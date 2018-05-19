@@ -22,8 +22,8 @@
  SOFTWARE.
  */
 
-#ifndef NLOPTUTIL_H
-#define NLOPTUTIL_H
+#ifndef NLOPTUTIL_HPP
+#define NLOPTUTIL_HPP
 
 #include <iostream>
 #include <chrono>
@@ -119,4 +119,4 @@ namespace nloptutil
     }
 }
 
-#endif // NLOPTUTIL_H
+#endif // NLOPTUTIL_HPP
