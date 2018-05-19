@@ -43,6 +43,7 @@ namespace nloptutil
                                    int              max_evaluations    = 1000,
                                    double           relative_func_tol  = 1e-06,
                                    double           relative_param_tol = 1e-06,
+                                   bool             is_maximization    = false,
                                    bool             verbose            = true,
                                    double           initial_step_scale = 1.0
                                    )
@@ -56,10 +57,18 @@ namespace nloptutil
         solver.set_lower_bounds(l);
         solver.set_upper_bounds(u);
         solver.set_maxeval(max_evaluations);
-        solver.set_min_objective(*objective_function.target<nlopt::vfunc>(), data);
         solver.set_ftol_rel(relative_func_tol);
         solver.set_xtol_rel(relative_param_tol);
         
+        if (is_maximization)
+        {
+            solver.set_max_objective(*objective_function.target<nlopt::vfunc>(), data);
+        }
+        else
+        {
+            solver.set_min_objective(*objective_function.target<nlopt::vfunc>(), data);
+        }
+
         std::vector<double> x_star(x_initial.data(), x_initial.data() + x_initial.rows());
 
         // Record the cost value for the initial solution
