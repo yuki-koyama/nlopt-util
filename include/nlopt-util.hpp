@@ -100,13 +100,13 @@ namespace nloptutil
         }
         catch (std::invalid_argument e)
         {
-            std::cerr << e.what() << std::endl;
+            if (verbose) { std::cerr << e.what() << std::endl; }
             assert(false);
         }
         catch (std::runtime_error e)
         {
-            std::cerr << e.what() << std::endl;
-            assert(false);
+            if (verbose) { std::cerr << e.what() << std::endl; }
+            return x_initial;
         }
 
         // Stop timing measurement
