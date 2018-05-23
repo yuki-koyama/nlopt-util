@@ -44,7 +44,7 @@ namespace nloptutil
                                    double           relative_func_tol  = 1e-06,
                                    double           relative_param_tol = 1e-06,
                                    bool             is_maximization    = false,
-                                   bool             verbose            = true,
+                                   bool             verbose            = false,
                                    double           initial_step_scale = 1.0
                                    )
     {
