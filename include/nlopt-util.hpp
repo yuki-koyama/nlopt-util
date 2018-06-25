@@ -32,12 +32,10 @@
 
 namespace nloptutil
 {
-    using obj_func = std::function<double(const std::vector<double>&, std::vector<double>&, void*)>;
-    
     inline Eigen::VectorXd compute(const Eigen::VectorXd& x_initial,
                                    const Eigen::VectorXd& upper,
                                    const Eigen::VectorXd& lower,
-                                   const obj_func&        objective_function,
+                                   const nlopt::vfunc     objective_function,
                                    void*            data               = nullptr,
                                    nlopt::algorithm algorithm          = nlopt::LD_TNEWTON,
                                    int              max_evaluations    = 1000,
@@ -45,14 +43,13 @@ namespace nloptutil
                                    double           relative_param_tol = 1e-06,
                                    bool             is_maximization    = false,
                                    bool             verbose            = false,
-                                   double           initial_step_scale = 1.0
-                                   )
+                                   double           initial_step_scale = 1.0)
     {
         const unsigned M = static_cast<unsigned>(x_initial.rows());
         
         const std::vector<double> l(lower.data(), lower.data() + lower.rows());
         const std::vector<double> u(upper.data(), upper.data() + upper.rows());
-       
+        
         nlopt::opt solver(algorithm, M);
         solver.set_lower_bounds(l);
         solver.set_upper_bounds(u);
@@ -62,15 +59,15 @@ namespace nloptutil
         
         if (is_maximization)
         {
-            solver.set_max_objective(*objective_function.target<nlopt::vfunc>(), data);
+            solver.set_max_objective(objective_function, data);
         }
         else
         {
-            solver.set_min_objective(*objective_function.target<nlopt::vfunc>(), data);
+            solver.set_min_objective(objective_function, data);
         }
-
+        
         std::vector<double> x_star(x_initial.data(), x_initial.data() + x_initial.rows());
-
+        
         // Record the cost value for the initial solution
         double initial_cost_value;
         if (verbose)
@@ -84,10 +81,10 @@ namespace nloptutil
         solver.get_initial_step(x_star, step);
         for (auto& d : step) d *= initial_step_scale;
         solver.set_initial_step(step);
-
+        
         // Start timing measurement
         const auto t_start = std::chrono::system_clock::now();
-
+        
         // Run the optimization
         double final_cost_value;
         try
@@ -108,10 +105,10 @@ namespace nloptutil
             if (verbose) { std::cerr << e.what() << std::endl; }
             return x_initial;
         }
-
+        
         // Stop timing measurement
         const auto t_end = std::chrono::system_clock::now();
-
+        
         // Show statistics if "verbose" is set as true
         if (verbose)
         {
