@@ -3,4 +3,4 @@ A header-only utility library for calling NLopt optimization in a single line us
 
 ## Projects using nlopt-util
 
-- OptiMo [CHI 2018]
+- OptiMo [CHI 2018] <https://github.com/yuki-koyama/optimo>
