@@ -26,6 +26,9 @@
 #define NLOPTUTIL_HPP
 
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <iomanip>
 #include <chrono>
 #include <Eigen/Core>
 #include <nlopt.hpp>
@@ -141,12 +144,32 @@ namespace nloptutil
         // Show statistics if "verbose" is set as true
         if (verbose)
         {
-            const double t_elapsed_in_sec = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count() / 1000.0;
+            const std::string elapsed_time_message = [&]()
+            {
+                const auto t_elapsed_in_microsec = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start).count();
+                const auto t_elapsed_in_millisec = t_elapsed_in_microsec / 1000.0;
+                const auto t_elapsed_in_sec = t_elapsed_in_millisec / 1000.0;
+
+                std::ostringstream sstream;
+                if (t_elapsed_in_sec > 10.0)
+                {
+                    sstream << std::fixed << std::setprecision(3) << t_elapsed_in_sec << " [s]";
+                }
+                else if (t_elapsed_in_millisec > 10.0)
+                {
+                    sstream << std::fixed << std::setprecision(3) << t_elapsed_in_millisec << " [ms]";
+                }
+                else
+                {
+                    sstream << t_elapsed_in_microsec << " [us]";
+                }
+                return sstream.str();
+            }();
 
             std::cout << "---- nlopt-util ----" << std::endl;
             std::cout << "Dimensions     : " << M << std::endl;
             std::cout << "Function value : " << initial_cost_value << " => " << final_cost_value << std::endl;
-            std::cout << "Elapsed time   : " << t_elapsed_in_sec << " [s]" << std::endl;
+            std::cout << "Elapsed time   : " << elapsed_time_message << std::endl;
             std::cout << "Function evals : " << solver.get_numevals() << std::endl;
             std::cout << "--------------------" << std::endl;
         }
