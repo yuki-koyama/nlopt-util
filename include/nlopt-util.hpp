@@ -147,6 +147,7 @@ namespace nloptutil
             std::cout << "Dimensions     : " << M << std::endl;
             std::cout << "Function value : " << initial_cost_value << " => " << final_cost_value << std::endl;
             std::cout << "Elapsed time   : " << t_elapsed_in_sec << " [s]" << std::endl;
+            std::cout << "Function evals : " << solver.get_numevals() << std::endl;
             std::cout << "--------------------" << std::endl;
         }
 
