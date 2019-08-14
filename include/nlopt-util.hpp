@@ -225,7 +225,7 @@ namespace nloptutil
                 const std::function<Eigen::VectorXd(const Eigen::VectorXd&)> gradient;
             };
 
-            double objective_wrapper(const std::vector<double>& x, std::vector<double>& grad, void* data)
+            inline double objective_wrapper(const std::vector<double>& x, std::vector<double>& grad, void* data)
             {
                 const Eigen::VectorXd g =
                     static_cast<Func*>(data)->gradient(Eigen::Map<const Eigen::VectorXd>(x.data(), x.size()));
