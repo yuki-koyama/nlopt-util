@@ -25,13 +25,13 @@
 #ifndef NLOPTUTIL_HPP
 #define NLOPTUTIL_HPP
 
+#include <Eigen/Core>
+#include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <nlopt.hpp>
 #include <sstream>
 #include <string>
-#include <iomanip>
-#include <chrono>
-#include <Eigen/Core>
-#include <nlopt.hpp>
 
 namespace nloptutil
 {
@@ -40,20 +40,20 @@ namespace nloptutil
         constexpr double constraint_tol = 1e-10;
     }
 
-    inline Eigen::VectorXd solve(const Eigen::VectorXd& x_initial,
-                                 const Eigen::VectorXd& upper,
-                                 const Eigen::VectorXd& lower,
+    inline Eigen::VectorXd solve(const Eigen::VectorXd&           x_initial,
+                                 const Eigen::VectorXd&           upper,
+                                 const Eigen::VectorXd&           lower,
                                  const nlopt::vfunc               objective_function,
                                  const std::vector<nlopt::vfunc>& equality_constraints,
                                  const std::vector<nlopt::vfunc>& inequality_constraints,
-                                 nlopt::algorithm algorithm           = nlopt::LD_TNEWTON,
-                                 void*            data                = nullptr,
-                                 bool             is_maximization     = false,
-                                 int              max_evaluations     = 1000,
-                                 double           relative_func_tol   = 1e-06,
-                                 double           relative_param_tol  = 1e-06,
-                                 bool             verbose             = false,
-                                 double           initial_step_scale  = 1.0)
+                                 nlopt::algorithm                 algorithm          = nlopt::LD_TNEWTON,
+                                 void*                            data               = nullptr,
+                                 bool                             is_maximization    = false,
+                                 int                              max_evaluations    = 1000,
+                                 double                           relative_func_tol  = 1e-06,
+                                 double                           relative_param_tol = 1e-06,
+                                 bool                             verbose            = false,
+                                 double                           initial_step_scale = 1.0)
     {
         const unsigned M = static_cast<unsigned>(x_initial.rows());
 
@@ -105,11 +105,13 @@ namespace nloptutil
         }
 
         // Scale the initial step size (only for derivative-free algorithms such as nlopt::LN_COBYLA)
-        const std::vector<double> step = [&]()
-        {
+        const std::vector<double> step = [&]() {
             std::vector<double> step(M, 0.0);
             solver.get_initial_step(x_star, step);
-            for (auto& d : step) { d *= initial_step_scale; }
+            for (auto& d : step)
+            {
+                d *= initial_step_scale;
+            }
             return step;
         }();
         solver.set_initial_step(step);
@@ -129,12 +131,18 @@ namespace nloptutil
         }
         catch (std::invalid_argument e)
         {
-            if (verbose) { std::cerr << e.what() << std::endl; }
+            if (verbose)
+            {
+                std::cerr << e.what() << std::endl;
+            }
             assert(false);
         }
         catch (std::runtime_error e)
         {
-            if (verbose) { std::cerr << e.what() << std::endl; }
+            if (verbose)
+            {
+                std::cerr << e.what() << std::endl;
+            }
             return x_initial;
         }
 
@@ -144,11 +152,11 @@ namespace nloptutil
         // Show statistics if "verbose" is set as true
         if (verbose)
         {
-            const std::string elapsed_time_message = [&]()
-            {
-                const auto t_elapsed_in_microsec = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start).count();
+            const std::string elapsed_time_message = [&]() {
+                const auto t_elapsed_in_microsec =
+                    std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start).count();
                 const auto t_elapsed_in_millisec = t_elapsed_in_microsec / 1000.0;
-                const auto t_elapsed_in_sec = t_elapsed_in_millisec / 1000.0;
+                const auto t_elapsed_in_sec      = t_elapsed_in_millisec / 1000.0;
 
                 std::ostringstream sstream;
                 if (t_elapsed_in_sec > 10.0)
@@ -181,14 +189,14 @@ namespace nloptutil
                                  const Eigen::VectorXd& upper,
                                  const Eigen::VectorXd& lower,
                                  const nlopt::vfunc     objective_function,
-                                 nlopt::algorithm algorithm           = nlopt::LD_TNEWTON,
-                                 void*            data                = nullptr,
-                                 bool             is_maximization     = false,
-                                 int              max_evaluations     = 1000,
-                                 double           relative_func_tol   = 1e-06,
-                                 double           relative_param_tol  = 1e-06,
-                                 bool             verbose             = false,
-                                 double           initial_step_scale  = 1.0)
+                                 nlopt::algorithm       algorithm          = nlopt::LD_TNEWTON,
+                                 void*                  data               = nullptr,
+                                 bool                   is_maximization    = false,
+                                 int                    max_evaluations    = 1000,
+                                 double                 relative_func_tol  = 1e-06,
+                                 double                 relative_param_tol = 1e-06,
+                                 bool                   verbose            = false,
+                                 double                 initial_step_scale = 1.0)
     {
         return solve(x_initial,
                      upper,
@@ -205,6 +213,6 @@ namespace nloptutil
                      verbose,
                      initial_step_scale);
     }
-}
+} // namespace nloptutil
 
 #endif // NLOPTUTIL_HPP
