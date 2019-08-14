@@ -27,6 +27,7 @@
 
 #include <Eigen/Core>
 #include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <nlopt.hpp>
@@ -213,6 +214,56 @@ namespace nloptutil
                      verbose,
                      initial_step_scale);
     }
+
+    namespace unconstrained
+    {
+        namespace grad_based
+        {
+            struct Func
+            {
+                const std::function<double(const Eigen::VectorXd&)>          objective;
+                const std::function<Eigen::VectorXd(const Eigen::VectorXd&)> gradient;
+            };
+
+            double objective_wrapper(const std::vector<double>& x, std::vector<double>& grad, void* data)
+            {
+                const Eigen::VectorXd g =
+                    static_cast<Func*>(data)->gradient(Eigen::Map<const Eigen::VectorXd>(x.data(), x.size()));
+                std::memcpy(grad.data(), g.data(), sizeof(double) * g.size());
+                return static_cast<Func*>(data)->objective(Eigen::Map<const Eigen::VectorXd>(x.data(), x.size()));
+            }
+
+            namespace bounded
+            {
+                inline Eigen::VectorXd solve(const Eigen::VectorXd&                                        x_initial,
+                                             const Eigen::VectorXd&                                        upper,
+                                             const Eigen::VectorXd&                                        lower,
+                                             const std::function<double(const Eigen::VectorXd&)>&          objective,
+                                             const std::function<Eigen::VectorXd(const Eigen::VectorXd&)>& gradient,
+                                             nlopt::algorithm algorithm          = nlopt::LD_TNEWTON,
+                                             bool             is_maximization    = false,
+                                             int              max_evaluations    = 1000,
+                                             double           relative_func_tol  = 1e-06,
+                                             double           relative_param_tol = 1e-06,
+                                             bool             verbose            = false)
+                {
+                    nloptutil::unconstrained::grad_based::Func func{objective, gradient};
+
+                    return nloptutil::solve(x_initial,
+                                            upper,
+                                            lower,
+                                            nloptutil::unconstrained::grad_based::objective_wrapper,
+                                            algorithm,
+                                            static_cast<void*>(&func),
+                                            is_maximization,
+                                            max_evaluations,
+                                            relative_func_tol,
+                                            relative_param_tol,
+                                            verbose);
+                }
+            } // namespace bounded
+        }     // namespace grad_based
+    }         // namespace unconstrained
 } // namespace nloptutil
 
 #endif // NLOPTUTIL_HPP
