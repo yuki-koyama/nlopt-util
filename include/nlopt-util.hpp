@@ -128,7 +128,7 @@ namespace nloptutil
         }
         catch (nlopt::roundoff_limited)
         {
-            // Ignore roundoff_limited exceptions
+            // Do nothing when this exception is thrown
         }
         catch (std::invalid_argument e)
         {
@@ -137,6 +137,14 @@ namespace nloptutil
                 std::cerr << e.what() << std::endl;
             }
             assert(false);
+        }
+        catch (nlopt::forced_stop e)
+        {
+            // Do nothing when this exception is thrown
+            if (verbose)
+            {
+                std::cerr << e.what() << std::endl;
+            }
         }
         catch (std::runtime_error e)
         {
