@@ -271,6 +271,42 @@ namespace nloptutil
                 }
             } // namespace bounded
         }     // namespace grad_based
+
+        namespace derivative_free
+        {
+            inline double objective_wrapper(const std::vector<double>& x, std::vector<double>&, void* data)
+            {
+                return (*static_cast<std::function<double(const Eigen::VectorXd&)>*>(data))(
+                    Eigen::Map<const Eigen::VectorXd>(x.data(), x.size()));
+            }
+
+            namespace bounded
+            {
+                inline Eigen::VectorXd solve(const Eigen::VectorXd&                               x_initial,
+                                             const Eigen::VectorXd&                               upper,
+                                             const Eigen::VectorXd&                               lower,
+                                             const std::function<double(const Eigen::VectorXd&)>& objective,
+                                             const nlopt::algorithm algorithm       = nlopt::GN_DIRECT,
+                                             const bool             is_maximization = false,
+                                             const int              max_evaluations = 1000,
+                                             const bool             verbose         = false)
+                {
+                    auto objective_local_copy = objective;
+
+                    return nloptutil::solve(x_initial,
+                                            upper,
+                                            lower,
+                                            nloptutil::unconstrained::derivative_free::objective_wrapper,
+                                            algorithm,
+                                            static_cast<void*>(&objective_local_copy),
+                                            is_maximization,
+                                            max_evaluations,
+                                            0.0,
+                                            0.0,
+                                            verbose);
+                }
+            } // namespace bounded
+        }     // namespace derivative_free
     }         // namespace unconstrained
 } // namespace nloptutil
 
