@@ -27,6 +27,7 @@
 
 #include <Eigen/Core>
 #include <chrono>
+#include <cassert>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
